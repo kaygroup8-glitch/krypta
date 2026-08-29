@@ -59,3 +59,20 @@ export async function getOptionChain(underlyingSymbol: string) {
 
   return res.json();
 }
+
+export async function getUnderlyingPrice(symbol: string): Promise<number> {
+  const res = await fetch(`https://data.alpaca.markets/v2/stocks/${symbol}/quotes/latest`, {
+    headers: getAlpacaHeaders(),
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Alpaca API error (${res.status}): ${body}`);
+  }
+  const data = await res.json();
+  const { ap, bp } = data.quote ?? {};
+  if (ap == null || bp == null) {
+    throw new Error("Insufficient verified data: no live quote for underlying.");
+  }
+  return (ap + bp) / 2;
+}
