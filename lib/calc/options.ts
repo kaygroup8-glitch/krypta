@@ -54,3 +54,17 @@ export function calculateBullCallDebitSpread(longLeg: DebitSpreadLeg, shortLeg: 
     strikeWidth,
   };
 }
+
+export const LIQUIDITY_SPREAD_THRESHOLD_PERCENT = 8;
+
+export function calculateQuoteSpreadPercent(leg: DebitSpreadLeg): number {
+  const mid = (leg.askPrice + leg.bidPrice) / 2;
+  if (mid <= 0) return 0;
+  return ((leg.askPrice - leg.bidPrice) / mid) * 100;
+}
+
+export function describeLiquidity(leg: DebitSpreadLeg): string {
+  const spreadPercent = calculateQuoteSpreadPercent(leg);
+  const flag = spreadPercent > LIQUIDITY_SPREAD_THRESHOLD_PERCENT ? "elevated" : "normal";
+  return `${spreadPercent.toFixed(1)}% (${flag}, threshold ${LIQUIDITY_SPREAD_THRESHOLD_PERCENT}%)`;
+}
