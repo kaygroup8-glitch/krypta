@@ -20,8 +20,8 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-6 py-20 sm:px-10">
-      <div className="w-full max-w-xl">
+    <main className="flex min-h-screen flex-col items-center justify-center px-6 py-20">
+      <div className="container-fluid">
         <div data-mounted={mounted} className="reveal-fade flex items-center gap-2">
           <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
           <span className="text-sm font-medium tracking-[0.2em] text-muted uppercase">
@@ -32,7 +32,7 @@ export default function Home() {
         <h1
           data-mounted={mounted}
           style={{ animationDelay: "75ms" }}
-          className="reveal mt-8 text-balance text-4xl font-medium leading-[1.1] tracking-tight sm:text-6xl"
+          className="reveal text-fluid-hero mt-8 text-balance font-medium leading-[1.1] tracking-tight"
         >
           Prove the trade before you place it.
         </h1>
@@ -40,7 +40,7 @@ export default function Home() {
         <p
           data-mounted={mounted}
           style={{ animationDelay: "150ms" }}
-          className="reveal mt-6 max-w-md text-balance text-base leading-relaxed text-muted sm:text-lg"
+          className="reveal text-fluid-body mt-6 max-w-2xl text-balance leading-relaxed text-muted"
         >
           An evidence-first AI options agent that researches, challenges, and validates a trade before paper execution.
         </p>
@@ -73,7 +73,7 @@ export default function Home() {
         </p>
       </div>
 
-      <div id="how-it-works" className="mt-28 w-full max-w-xl scroll-mt-10">
+      <div id="how-it-works" className="container-fluid mt-28 scroll-mt-10">
         <ol className="relative border-l border-border pl-8">
           {PROOF_CHAIN.map((step, i) => (
             <li
@@ -89,7 +89,7 @@ export default function Home() {
               <p className="font-mono text-xs uppercase tracking-[0.15em] text-accent">
                 {step.label}
               </p>
-              <p className="mt-1.5 text-sm text-muted">{step.detail}</p>
+              <p className="text-fluid-body mt-1.5 text-muted">{step.detail}</p>
             </li>
           ))}
         </ol>

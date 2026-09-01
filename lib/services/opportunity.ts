@@ -5,11 +5,9 @@ import { challengeThesis } from "@/lib/services/risk-critic";
 import { evaluateRiskGate, type RiskBoundary } from "@/lib/risk/gate";
 
 export async function buildOpportunity(symbol: string, riskBoundary: RiskBoundary) {
-  const [chain, spotPrice, account] = await Promise.all([
-    getOptionChain(symbol),
-    getUnderlyingPrice(symbol),
-    getAccount(),
-  ]);
+  const chain = await getOptionChain(symbol);
+  const spotPrice = await getUnderlyingPrice(symbol);
+  const account = await getAccount();
 
   const snapshots = chain.snapshots ?? {};
   const byExpiration: Record<string, DebitSpreadLeg[]> = {};

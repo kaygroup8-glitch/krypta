@@ -90,9 +90,9 @@ export default function Onboarding() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-6 py-16 sm:px-10">
+    <main className="flex min-h-screen flex-col items-center justify-center px-6 py-16">
       <div
-        className="w-full max-w-md transition-all duration-300"
+        className="w-[min(92vw,32rem)] transition-all duration-300"
         style={{
           transitionTimingFunction: "cubic-bezier(0.23, 1, 0.32, 1)",
           opacity: leaving ? 0 : 1,
@@ -105,10 +105,10 @@ export default function Onboarding() {
 
         {step === 0 && (
           <>
-            <h1 className="mt-4 text-balance text-3xl font-medium leading-tight tracking-tight">
+            <h1 className="text-fluid-h1 mt-4 text-balance font-medium leading-tight tracking-tight">
               Let&apos;s establish your trading environment.
             </h1>
-            <p className="mt-4 text-sm leading-relaxed text-muted">
+            <p className="text-fluid-body mt-4 leading-relaxed text-muted">
               {connectionStatus === "checking" && "Checking Alpaca connection..."}
               {connectionStatus === "connected" && "Connected. Paper trading account active."}
               {connectionStatus === "unavailable" && "Alpaca connection required."}
@@ -118,10 +118,10 @@ export default function Onboarding() {
 
         {step === 1 && (
           <>
-            <h1 className="mt-4 text-balance text-3xl font-medium leading-tight tracking-tight">
+            <h1 className="text-fluid-h1 mt-4 text-balance font-medium leading-tight tracking-tight">
               Paper trading only.
             </h1>
-            <p className="mt-4 text-sm leading-relaxed text-muted">
+            <p className="text-fluid-body mt-4 leading-relaxed text-muted">
               Every trade KRYPTA proposes executes in Alpaca&apos;s paper environment. No real funds are ever placed at risk here.
             </p>
           </>
@@ -129,10 +129,10 @@ export default function Onboarding() {
 
         {step === 2 && (
           <>
-            <h1 className="mt-4 text-balance text-3xl font-medium leading-tight tracking-tight">
+            <h1 className="text-fluid-h1 mt-4 text-balance font-medium leading-tight tracking-tight">
               Set your risk boundary.
             </h1>
-            <p className="mt-4 text-sm leading-relaxed text-muted">
+            <p className="text-fluid-body mt-4 leading-relaxed text-muted">
               The Risk Gate will use this to check every proposed trade. You can change it later.
             </p>
             <div className="mt-6 flex flex-col gap-2">
@@ -157,10 +157,10 @@ export default function Onboarding() {
 
         {step === 3 && (
           <>
-            <h1 className="mt-4 text-balance text-3xl font-medium leading-tight tracking-tight">
+            <h1 className="text-fluid-h1 mt-4 text-balance font-medium leading-tight tracking-tight">
               Your workspace is ready.
             </h1>
-            <ul className="mt-4 space-y-1.5 text-sm text-muted">
+            <ul className="text-fluid-body mt-4 space-y-1.5 text-muted">
               <li>Environment: Paper trading</li>
               <li>Risk boundary: {RISK_OPTIONS.find((o) => o.id === riskBoundary)?.label}</li>
             </ul>
