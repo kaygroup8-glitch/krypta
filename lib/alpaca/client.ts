@@ -79,3 +79,11 @@ export async function getUnderlyingPrice(symbol: string): Promise<number> {
   }
   return (ap + bp) / 2;
 }
+
+export async function getPositions() {
+  return alpacaFetch("/v2/positions");
+}
+
+export async function closePosition(symbolOrAssetId: string) {
+  return alpacaFetch(`/v2/positions/${symbolOrAssetId}`, { method: "DELETE" });
+}

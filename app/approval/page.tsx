@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getReviewedOpportunity } from "@/lib/storage/session";
 import { addJournalEntry } from "@/lib/storage/journal";
+import { playConfirmTone } from "@/lib/sound/confirm";
 
 interface ReviewedOpportunity {
   symbol: string;
@@ -23,6 +25,7 @@ interface ReviewedOpportunity {
 }
 
 export default function Approval() {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [data, setData] = useState<ReviewedOpportunity | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -51,6 +54,7 @@ export default function Approval() {
     } catch (error) {
       body = { placed: false, error: (error as Error).message };
     }
+    if (body.placed) playConfirmTone();
     setResult(body);
     addJournalEntry({
       id: crypto.randomUUID(),
@@ -91,10 +95,10 @@ export default function Approval() {
         </Link>
 
         <h1 data-mounted={mounted} style={{ animationDelay: "75ms" }} className="reveal text-fluid-h1 mt-8 font-medium tracking-tight">
-          Confirm this trade.
+          KRYPTA has a proposal.
         </h1>
         <p data-mounted={mounted} style={{ animationDelay: "150ms" }} className="reveal mt-4 text-sm text-muted">
-          This is the execution boundary. Nothing places until you confirm.
+          The decision is yours. Nothing places until you confirm.
         </p>
 
         <section data-mounted={mounted} style={{ animationDelay: "225ms" }} className="reveal mt-8 rounded-2xl border border-border bg-surface p-6">
@@ -106,30 +110,34 @@ export default function Approval() {
             <div className="flex items-center justify-between"><dt className="text-muted">Max loss</dt><dd>${data.spread.maxLoss.toFixed(2)}</dd></div>
             <div className="flex items-center justify-between"><dt className="text-muted">Breakeven</dt><dd>${data.spread.breakeven.toFixed(2)}</dd></div>
           </dl>
-          <p className="mt-4 text-xs text-muted">
-            Limit order, net debit {data.spread.netDebitPerShare.toFixed(2)} per share, day order, paper environment only.
-          </p>
+          <p className="mt-4 text-xs text-muted">Limit order, net debit {data.spread.netDebitPerShare.toFixed(2)} per share, day order, paper environment.</p>
         </section>
 
         {!result && (
-          <button
-            type="button"
-            disabled={submitting}
-            onClick={confirmOrder}
-            className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-accent px-8 py-3.5 text-sm font-medium text-background transition-transform duration-150 ease-out hover:brightness-110 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50 sm:w-auto"
-          >
-            {submitting ? "Placing paper order..." : "Place paper order"}
-          </button>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              disabled={submitting}
+              onClick={confirmOrder}
+              className="inline-flex flex-1 items-center justify-center rounded-full bg-accent px-8 py-3.5 text-sm font-medium text-background transition-transform duration-150 ease-out hover:brightness-110 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50"
+            >
+              {submitting ? "Placing paper order..." : "Approve paper order"}
+            </button>
+            <button
+              type="button"
+              disabled={submitting}
+              onClick={() => router.push("/overview")}
+              className="inline-flex items-center justify-center rounded-full border border-border px-8 py-3.5 text-sm font-medium text-muted transition-colors hover:text-foreground disabled:opacity-50"
+            >
+              Decline
+            </button>
+          </div>
         )}
 
         {result && (
           <section className="mt-6 rounded-2xl border border-border bg-surface p-6">
-            <h2 className="font-mono text-xs uppercase tracking-[0.15em] text-accent">
-              {result.placed ? "Order placed" : "Order failed"}
-            </h2>
-            <p className="mt-3 text-sm text-muted">
-              {result.placed ? `Order ID ${result.order?.id}, status ${result.order?.status}.` : result.error}
-            </p>
+            <h2 className="font-mono text-xs uppercase tracking-[0.15em] text-accent">{result.placed ? "Order placed" : "Order failed"}</h2>
+            <p className="mt-3 text-sm text-muted">{result.placed ? `Order ID ${result.order?.id}, status ${result.order?.status}.` : result.error}</p>
             <Link href="/overview" className="mt-4 inline-block text-sm text-accent">← Back to Overview</Link>
           </section>
         )}
