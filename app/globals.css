@@ -64,7 +64,7 @@ body {
 }
 
 .container-fluid {
-  width: min(90vw, 72rem);
+  width: min(90vw, 80rem);
   margin-left: auto;
   margin-right: auto;
 }
