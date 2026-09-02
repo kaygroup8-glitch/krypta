@@ -6,15 +6,16 @@ export function playConfirmTone() {
     const ctx = new AudioContextClass();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
+    const now = ctx.currentTime;
     osc.type = "sine";
-    osc.frequency.setValueAtTime(220, ctx.currentTime);
-    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.32);
+    osc.frequency.setValueAtTime(220, now);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.15, now + 0.03);
+    gain.gain.linearRampToValueAtTime(0, now + 0.35);
     osc.connect(gain);
     gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.34);
+    osc.start(now);
+    osc.stop(now + 0.4);
     osc.onended = () => ctx.close();
   } catch {
     // Sound is a nicety, never block progress on it.
