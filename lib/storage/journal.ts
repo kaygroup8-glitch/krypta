@@ -7,6 +7,7 @@ export interface JournalEntry {
   thesis: string;
   evidence: string[];
   concerns: string[];
+  riskGateChecks?: { name: string; passed: boolean; detail: string }[];
   maxProfit: number;
   maxLoss: number;
   breakeven: number;

@@ -21,6 +21,7 @@ interface ReviewedOpportunity {
   };
   thesis: { thesis: string; supportedBy: string[] };
   critique: { hasConcerns: boolean; concerns: string[]; dataLimitations: string[] };
+  riskGate: { passed: boolean; checks: { name: string; passed: boolean; detail: string }[] };
   decision: string;
 }
 
@@ -66,6 +67,7 @@ export default function Approval() {
       thesis: data.thesis.thesis,
       evidence: data.thesis.supportedBy,
       concerns: data.critique.concerns,
+      riskGateChecks: data.riskGate.checks,
       maxProfit: data.spread.maxProfit,
       maxLoss: data.spread.maxLoss,
       breakeven: data.spread.breakeven,
