@@ -87,3 +87,7 @@ export async function getPositions() {
 export async function closePosition(symbolOrAssetId: string) {
   return alpacaFetch(`/v2/positions/${symbolOrAssetId}`, { method: "DELETE" });
 }
+
+export async function getOrderHistory() {
+  return alpacaFetch("/v2/orders?status=all&limit=50&direction=desc&nested=true");
+}

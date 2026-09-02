@@ -3,17 +3,19 @@ import { describeLiquidity, type DebitSpreadLeg } from "@/lib/calc/options";
 import type { Thesis } from "@/lib/services/thesis-builder";
 
 export interface RiskCritique {
-  hasConcerns: boolean;
   concerns: string[];
+  dataLimitations: string[];
+  hasConcerns: boolean;
 }
 
 const CRITIQUE_SCHEMA = {
   type: "object",
   properties: {
-    hasConcerns: { type: "boolean" },
     concerns: { type: "array", items: { type: "string" } },
+    dataLimitations: { type: "array", items: { type: "string" } },
+    hasConcerns: { type: "boolean" },
   },
-  required: ["hasConcerns", "concerns"],
+  required: ["concerns", "dataLimitations", "hasConcerns"],
   additionalProperties: false,
 };
 
@@ -31,10 +33,10 @@ export async function challengeThesis(params: {
 }): Promise<RiskCritique> {
   const system =
     "You are the Risk Critic inside KRYPTA, an evidence-first options trading system. " +
-    "Your only job is to attempt to invalidate the thesis below, using only the verified data it was built from. Never invent a figure not present in that data. " +
-    "The quote spread percentage for each leg has already been evaluated against KRYPTA's liquidity threshold and labeled normal or elevated. Raise it as a concern only if it is labeled elevated. " +
-    "Also consider missing data, contradictory pricing, strategy mismatch, or weak evidence. " +
-    "Set hasConcerns to true only if you list at least one genuine, data grounded concern. If you find none, set hasConcerns to false and return an empty concerns array.";
+    "Your job is to attempt to invalidate the thesis below, using only the verified data it was built from. Never invent a figure not present in that data. " +
+    "Separate two different things. CONCERNS are specific, actionable problems with this particular trade or its data, a crossed quote, an inconsistent number, a liquidity spread already labeled elevated, a genuine strategy mismatch. DATA LIMITATIONS are structural facts about what this data feed never includes, no implied volatility, no market depth, true of every trade on this tier and not, by themselves, a reason to distrust this specific one. " +
+    "The quote spread percentage for each leg has already been evaluated against KRYPTA's liquidity threshold and labeled normal or elevated. Only put it in concerns if it is labeled elevated. " +
+    "Set hasConcerns to true only if concerns contains at least one genuine, specific, actionable issue. Routine data limitations belong only in dataLimitations, never in concerns, and never make hasConcerns true by themselves.";
 
   const user = `Verified data for ${params.symbol}, expiration ${params.expiration}:
 Spot price: ${params.spotPrice}

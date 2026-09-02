@@ -20,7 +20,7 @@ interface ReviewedOpportunity {
     breakeven: number;
   };
   thesis: { thesis: string; supportedBy: string[] };
-  critique: { hasConcerns: boolean; concerns: string[] };
+  critique: { hasConcerns: boolean; concerns: string[]; dataLimitations: string[] };
   decision: string;
 }
 
@@ -29,6 +29,7 @@ export default function Approval() {
   const [mounted, setMounted] = useState(false);
   const [data, setData] = useState<ReviewedOpportunity | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [acknowledged, setAcknowledged] = useState(false);
   const [result, setResult] = useState<{ placed: boolean; order?: any; error?: string } | null>(null);
 
   useEffect(() => {
@@ -87,12 +88,13 @@ export default function Approval() {
     );
   }
 
+  const isOverride = data.decision === "WAIT";
+  const canSubmit = isOverride ? acknowledged : true;
+
   return (
     <main className="flex min-h-screen flex-col items-center px-6 py-16">
       <div className="container-fluid">
-        <Link href={`/opportunity?symbol=${data.symbol}`} data-mounted={mounted} className="reveal-fade text-sm text-muted transition-colors hover:text-foreground">
-          ← {data.symbol}
-        </Link>
+        <Link href={`/opportunity?symbol=${data.symbol}`} data-mounted={mounted} className="reveal-fade text-sm text-muted transition-colors hover:text-foreground">← {data.symbol}</Link>
 
         <h1 data-mounted={mounted} style={{ animationDelay: "75ms" }} className="reveal text-fluid-h1 mt-8 font-medium tracking-tight">
           KRYPTA has a proposal.
@@ -113,25 +115,28 @@ export default function Approval() {
           <p className="mt-4 text-xs text-muted">Limit order, net debit {data.spread.netDebitPerShare.toFixed(2)} per share, day order, paper environment.</p>
         </section>
 
+        {isOverride && (
+          <section className="mt-4 rounded-2xl border border-risk/40 bg-surface p-6">
+            <h2 className="font-mono text-xs uppercase tracking-[0.15em] text-risk">Proceeding against KRYPTA's recommendation</h2>
+            <ul className="mt-3 space-y-1.5 text-sm text-muted">
+              {data.critique.concerns.map((c, i) => <li key={i}>{c}</li>)}
+            </ul>
+            <label className="mt-4 flex cursor-pointer items-start gap-3">
+              <input type="checkbox" checked={acknowledged} onChange={(e) => setAcknowledged(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 rounded border-border bg-background accent-risk" />
+              <span className="text-sm text-muted">I understand these concerns and want to proceed anyway.</span>
+            </label>
+          </section>
+        )}
+
         {!result && (
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <button
-              type="button"
-              disabled={submitting}
-              onClick={confirmOrder}
-              className="inline-flex flex-1 items-center justify-center rounded-full bg-accent px-8 py-3.5 text-sm font-medium text-background transition-transform duration-150 ease-out hover:brightness-110 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50"
-            >
-              {submitting ? "Placing paper order..." : "Approve paper order"}
-            </button>
-            <button
-              type="button"
-              disabled={submitting}
-              onClick={() => router.push("/overview")}
-              className="inline-flex items-center justify-center rounded-full border border-border px-8 py-3.5 text-sm font-medium text-muted transition-colors hover:text-foreground disabled:opacity-50"
-            >
-              Decline
-            </button>
-          </div>
+          <button
+            type="button"
+            disabled={submitting || !canSubmit}
+            onClick={confirmOrder}
+            className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-accent px-8 py-3.5 text-sm font-medium text-background transition-transform duration-150 ease-out hover:brightness-110 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50 sm:w-auto"
+          >
+            {submitting ? "Placing paper order..." : "Place paper order"}
+          </button>
         )}
 
         {result && (

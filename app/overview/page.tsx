@@ -106,6 +106,7 @@ export default function Overview() {
           </div>
           <div className="flex items-center gap-3">
             <Link href="/journal" className="text-sm text-muted transition-colors hover:text-foreground">Journal</Link>
+            <Link href="/trade-history" className="text-sm text-muted transition-colors hover:text-foreground">History</Link>
             <span className="rounded-full border border-border px-3 py-1 font-mono text-xs uppercase tracking-[0.1em] text-muted">Paper</span>
           </div>
         </div>

@@ -64,13 +64,13 @@ body {
 }
 
 .container-fluid {
-  width: min(92vw, 56rem);
+  width: min(90vw, 72rem);
   margin-left: auto;
   margin-right: auto;
 }
 
 .text-fluid-hero {
-  font-size: clamp(2.5rem, 1.5rem + 4vw, 5.5rem);
+  font-size: clamp(2.5rem, 1.5rem + 4vw, 6.5rem);
 }
 
 .text-fluid-h1 {
