@@ -12,6 +12,8 @@ interface AccountData {
   portfolio_value: string;
   buying_power: string;
   options_approved_level: number;
+  equity: string;
+  last_equity: string;
 }
 
 interface Position {
@@ -43,6 +45,10 @@ function formatCountdown(targetIso: string, now: number): string {
   const minutes = totalMinutes % 60;
   if (hours === 0) return `${minutes}m`;
   return `${hours}h ${minutes}m`;
+}
+
+function formatPL(value: number): string {
+  return `${value >= 0 ? "+" : ""}$${value.toFixed(2)}`;
 }
 
 export default function Overview() {
@@ -122,6 +128,13 @@ export default function Overview() {
     }
   }
 
+  const todayPL = account ? parseFloat(account.equity) - parseFloat(account.last_equity) : null;
+  const todayPLPercent =
+    account && parseFloat(account.last_equity) !== 0
+      ? (todayPL! / parseFloat(account.last_equity)) * 100
+      : null;
+  const openPL = positions ? positions.reduce((sum, p) => sum + parseFloat(p.unrealized_pl), 0) : null;
+
   return (
     <main className="flex min-h-screen flex-col items-center px-6 py-16">
       <div className="container-fluid">
@@ -141,7 +154,33 @@ export default function Overview() {
           Overview
         </h1>
 
-        <section data-mounted={mounted} style={{ animationDelay: "150ms" }} className="reveal mt-8 rounded-2xl border border-border bg-surface p-6">
+        {account && (
+          <section data-mounted={mounted} style={{ animationDelay: "125ms" }} className="reveal mt-8 rounded-2xl border border-border bg-surface p-6">
+            <h2 className="font-mono text-xs uppercase tracking-[0.15em] text-accent">P&amp;L</h2>
+            <p className="mt-1 text-xs text-muted">Today&apos;s change is Alpaca&apos;s own equity vs yesterday&apos;s close, not something we compute ourselves.</p>
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-muted">Today</p>
+                <p className={`mt-1 font-mono text-lg ${todayPL !== null && todayPL >= 0 ? "text-confirm" : "text-risk"}`}>
+                  {todayPL !== null ? formatPL(todayPL) : "—"}
+                </p>
+                {todayPLPercent !== null && (
+                  <p className={`text-xs ${todayPLPercent >= 0 ? "text-confirm" : "text-risk"}`}>
+                    {todayPLPercent >= 0 ? "+" : ""}{todayPLPercent.toFixed(2)}%
+                  </p>
+                )}
+              </div>
+              <div>
+                <p className="text-xs text-muted">Open positions</p>
+                <p className={`mt-1 font-mono text-lg ${openPL !== null && openPL >= 0 ? "text-confirm" : "text-risk"}`}>
+                  {openPL !== null ? formatPL(openPL) : "—"}
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section data-mounted={mounted} style={{ animationDelay: "150ms" }} className="reveal mt-4 rounded-2xl border border-border bg-surface p-6">
           <h2 className="font-mono text-xs uppercase tracking-[0.15em] text-accent">Market State</h2>
           <p className="mt-1 text-xs text-muted">Your real Alpaca paper account, fetched live on every visit.</p>
 
