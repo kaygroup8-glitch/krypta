@@ -28,6 +28,11 @@ interface OpportunityResult {
   decision?: "EXECUTE" | "WAIT" | "REJECT";
 }
 
+interface MarketClock {
+  is_open: boolean;
+  next_open: string;
+}
+
 const STAGES = ["observe", "evidence", "thesis", "challenge", "strategy", "riskgate", "summary", "decision"] as const;
 type Stage = typeof STAGES[number];
 
@@ -37,6 +42,16 @@ const DECISION_STYLE: Record<string, string> = {
   REJECT: "border-risk text-risk",
 };
 
+function formatCountdown(targetIso: string): string {
+  const diffMs = new Date(targetIso).getTime() - Date.now();
+  if (diffMs <= 0) return "any moment now";
+  const totalMinutes = Math.floor(diffMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) return `${minutes}m`;
+  return `${hours}h ${minutes}m`;
+}
+
 function OpportunityContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -45,6 +60,7 @@ function OpportunityContent() {
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<OpportunityResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [clock, setClock] = useState<MarketClock | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [stageIndex, setStageIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
@@ -63,6 +79,12 @@ function OpportunityContent() {
       })
       .catch(() => setError("Alpaca connection required."))
       .finally(() => setLoading(false));
+    fetch("/api/market-clock")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.connected) setClock(data.clock);
+      })
+      .catch(() => {});
   }, [symbol]);
 
   function advance() {
@@ -97,7 +119,26 @@ function OpportunityContent() {
       <div className="flex flex-1 items-center justify-center py-10">
         {loading && <p className="text-sm text-muted">Observing verified market data...</p>}
         {!loading && error && <p className="text-sm text-muted">{error}</p>}
-        {!loading && result?.insufficientData && <p className="text-sm text-muted">{result.message ?? "Nothing meets the current evidence threshold."}</p>}
+
+        {!loading && result?.insufficientData && (
+          <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 text-center">
+            {clock && !clock.is_open ? (
+              <>
+                <p className="text-sm">Markets are closed right now.</p>
+                <p className="mt-2 text-sm text-muted">
+                  Opens in {formatCountdown(clock.next_open)}. This isn&apos;t a bug, there&apos;s nothing to build a verified spread from until trading resumes.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm">{result.message ?? "Nothing meets the current evidence threshold."}</p>
+                <p className="mt-2 text-sm text-muted">
+                  Can happen with a thin or lightly traded options chain. Try a heavily traded ticker like SPY, AAPL, or QQQ.
+                </p>
+              </>
+            )}
+          </div>
+        )}
 
         {ready && (
           <div
