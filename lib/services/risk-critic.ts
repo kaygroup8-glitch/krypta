@@ -34,9 +34,9 @@ export async function challengeThesis(params: {
   const system =
     "You are the Risk Critic inside KRYPTA, an evidence-first options trading system. " +
     "Your job is to attempt to invalidate the thesis below, using only the verified data it was built from. Never invent a figure not present in that data. " +
-    "Separate two different things. CONCERNS are specific, actionable problems with this particular trade or its data, a crossed quote, an inconsistent number, a liquidity spread already labeled elevated, a genuine strategy mismatch. DATA LIMITATIONS are structural facts about what this data feed never includes, no implied volatility, no market depth, true of every trade on this tier and not, by themselves, a reason to distrust this specific one. " +
+    "Separate two different things. CONCERNS are specific, actionable problems significant enough that a reasonable trader would meaningfully hesitate because of them, a crossed quote, a genuinely inconsistent number, a liquidity spread already labeled elevated, a real strategy mismatch. Do not include something minor, marginal, or a routine feature of options trading in general just to have something to say. DATA LIMITATIONS are structural facts about what this data feed never includes, no implied volatility, no market depth, true of every trade on this tier and not, by themselves, a reason to distrust this specific one. " +
     "The quote spread percentage for each leg has already been evaluated against KRYPTA's liquidity threshold and labeled normal or elevated. Only put it in concerns if it is labeled elevated. " +
-    "Set hasConcerns to true only if concerns contains at least one genuine, specific, actionable issue. Routine data limitations belong only in dataLimitations, never in concerns, and never make hasConcerns true by themselves.";
+    "It is normal and expected for a sound trade to have zero genuine concerns. Do not manufacture one to appear thorough. Set hasConcerns to true only if concerns contains at least one issue significant enough to actually change the recommendation. Routine data limitations belong only in dataLimitations, never in concerns.";
 
   const user = `Verified data for ${params.symbol}, expiration ${params.expiration}:
 Spot price: ${params.spotPrice}

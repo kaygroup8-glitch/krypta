@@ -55,7 +55,7 @@ export function calculateBullCallDebitSpread(longLeg: DebitSpreadLeg, shortLeg: 
   };
 }
 
-export const LIQUIDITY_SPREAD_THRESHOLD_PERCENT = 8;
+export const LIQUIDITY_SPREAD_THRESHOLD_PERCENT = 15;
 
 export function calculateQuoteSpreadPercent(leg: DebitSpreadLeg): number {
   const mid = (leg.askPrice + leg.bidPrice) / 2;
