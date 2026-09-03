@@ -23,11 +23,27 @@ interface Position {
   unrealized_pl: string;
 }
 
+interface MarketClock {
+  is_open: boolean;
+  next_open: string;
+  next_close: string;
+}
+
 const RISK_LABELS: Record<RiskBoundary, string> = {
   conservative: "Conservative",
   balanced: "Balanced",
   aggressive: "Aggressive",
 };
+
+function formatCountdown(targetIso: string, now: number): string {
+  const diffMs = new Date(targetIso).getTime() - now;
+  if (diffMs <= 0) return "any moment now";
+  const totalMinutes = Math.floor(diffMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) return `${minutes}m`;
+  return `${hours}h ${minutes}m`;
+}
 
 export default function Overview() {
   const router = useRouter();
@@ -37,6 +53,8 @@ export default function Overview() {
   const [riskBoundary, setRiskBoundary] = useState<RiskBoundary>("balanced");
   const [account, setAccount] = useState<AccountData | null>(null);
   const [accountError, setAccountError] = useState(false);
+  const [clock, setClock] = useState<MarketClock | null>(null);
+  const [now, setNow] = useState(Date.now());
   const [positions, setPositions] = useState<Position[] | null>(null);
   const [positionsError, setPositionsError] = useState(false);
   const [refreshingPositions, setRefreshingPositions] = useState(false);
@@ -67,7 +85,15 @@ export default function Overview() {
         else setAccountError(true);
       })
       .catch(() => setAccountError(true));
+    fetch("/api/market-clock")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.connected) setClock(data.clock);
+      })
+      .catch(() => {});
     loadPositions();
+    const id = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(id);
   }, [loadPositions]);
 
   function checkOpportunity(e: React.FormEvent) {
@@ -118,6 +144,18 @@ export default function Overview() {
         <section data-mounted={mounted} style={{ animationDelay: "150ms" }} className="reveal mt-8 rounded-2xl border border-border bg-surface p-6">
           <h2 className="font-mono text-xs uppercase tracking-[0.15em] text-accent">Market State</h2>
           <p className="mt-1 text-xs text-muted">Your real Alpaca paper account, fetched live on every visit.</p>
+
+          {clock && (
+            <p className="mt-3 flex items-center gap-2 text-sm">
+              <span className={`h-1.5 w-1.5 rounded-full ${clock.is_open ? "bg-confirm" : "bg-muted"}`} aria-hidden="true" />
+              {clock.is_open ? (
+                <span className="text-confirm">Market open, closes in {formatCountdown(clock.next_close, now)}</span>
+              ) : (
+                <span className="text-muted">Market closed, opens in {formatCountdown(clock.next_open, now)}</span>
+              )}
+            </p>
+          )}
+
           {accountError && <p className="mt-3 text-sm text-muted">Alpaca connection required.</p>}
           {!accountError && !account && <p className="mt-3 text-sm text-muted">Checking account...</p>}
           {account && (
@@ -150,12 +188,7 @@ export default function Overview() {
                     <span>{p.symbol} · {p.side} {p.qty}</span>
                     <span className="flex items-center gap-3">
                       <span className={pl >= 0 ? "text-confirm" : "text-risk"}>{pl >= 0 ? "+" : ""}${pl.toFixed(2)}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleClose(p.symbol)}
-                        disabled={closingSymbol === p.symbol}
-                        className="text-xs text-muted underline decoration-dotted transition-colors hover:text-risk disabled:opacity-50"
-                      >
+                      <button type="button" onClick={() => handleClose(p.symbol)} disabled={closingSymbol === p.symbol} className="text-xs text-muted underline decoration-dotted transition-colors hover:text-risk disabled:opacity-50">
                         {closingSymbol === p.symbol ? "Closing..." : "Close"}
                       </button>
                     </span>
@@ -165,9 +198,7 @@ export default function Overview() {
             </ul>
           )}
           {closeResult && (
-            <p className={`mt-3 text-xs ${closeResult.ok ? "text-confirm" : "text-risk"}`}>
-              {closeResult.symbol}: {closeResult.message}
-            </p>
+            <p className={`mt-3 text-xs ${closeResult.ok ? "text-confirm" : "text-risk"}`}>{closeResult.symbol}: {closeResult.message}</p>
           )}
         </section>
 
@@ -194,12 +225,7 @@ export default function Overview() {
           <p className="mt-3 text-xs uppercase tracking-[0.1em] text-muted">Quick starts</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {quickStarts.map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => router.push(`/opportunity?symbol=${t}`)}
-                className="rounded-full border border-border px-3 py-1.5 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent"
-              >
+              <button key={t} type="button" onClick={() => router.push(`/opportunity?symbol=${t}`)} className="rounded-full border border-border px-3 py-1.5 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-accent">
                 {t}
               </button>
             ))}

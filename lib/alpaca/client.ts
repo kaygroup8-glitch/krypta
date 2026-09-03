@@ -91,3 +91,7 @@ export async function closePosition(symbolOrAssetId: string) {
 export async function getOrderHistory() {
   return alpacaFetch("/v2/orders?status=all&limit=50&direction=desc&nested=true");
 }
+
+export async function getMarketClock() {
+  return alpacaFetch("/v2/clock");
+}
