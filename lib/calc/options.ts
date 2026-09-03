@@ -19,6 +19,10 @@ export function parseOptionSymbol(symbol: string): ParsedOptionSymbol {
   return { root, expiration: `${year}-${month}-${day}`, type, strike };
 }
 
+function round2(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
 export interface DebitSpreadLeg {
   symbol: string;
   strike: number;
@@ -35,9 +39,9 @@ export function calculateBullCallDebitSpread(longLeg: DebitSpreadLeg, shortLeg: 
   }
 
   const strikeWidth = shortLeg.strike - longLeg.strike;
-  const netDebitPerShare = longLeg.askPrice - shortLeg.bidPrice;
-  const netDebitTotal = netDebitPerShare * 100;
-  const maxProfit = strikeWidth * 100 - netDebitTotal;
+  const netDebitPerShare = round2(longLeg.askPrice - shortLeg.bidPrice);
+  const netDebitTotal = round2(netDebitPerShare * 100);
+  const maxProfit = round2(strikeWidth * 100 - netDebitTotal);
 
   if (netDebitTotal <= 0 || maxProfit < 0) {
     throw new Error("Insufficient verified data: quotes produce a non-viable spread.");
@@ -50,7 +54,7 @@ export function calculateBullCallDebitSpread(longLeg: DebitSpreadLeg, shortLeg: 
     netDebitTotal,
     maxLoss: netDebitTotal,
     maxProfit,
-    breakeven: longLeg.strike + netDebitPerShare,
+    breakeven: round2(longLeg.strike + netDebitPerShare),
     strikeWidth,
   };
 }

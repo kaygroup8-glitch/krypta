@@ -77,7 +77,7 @@ export async function getUnderlyingPrice(symbol: string): Promise<number> {
   if (ap == null || bp == null) {
     throw new Error("Insufficient verified data: no live quote for underlying.");
   }
-  return (ap + bp) / 2;
+  return Math.round(((ap + bp) / 2) * 100) / 100;
 }
 
 export async function getPositions() {
